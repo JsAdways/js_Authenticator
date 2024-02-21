@@ -5,13 +5,19 @@ namespace Js\Authenticator\Controllers;
 use Illuminate\Http\Request;
 use Js\Authenticator\Services\AuthService;
 use Exception;
-
+use Log;
 class AuthController
 {
     public function __construct(
         private AuthService $AuthService
     ){}
 
+    /**
+     * 登入驗證
+     * 
+     * @param Request $request
+     * @return Response
+     */
     public function login(Request $request)
     {
         try {
@@ -19,7 +25,6 @@ class AuthController
                 'account' => 'required|string',
                 'password' => 'required|string',
             ]);
-
             $login_data = $this->AuthService->login($account, $password);
 
             return response()->json(
@@ -41,6 +46,12 @@ class AuthController
         }
     }
 
+    /**
+     * 取得登入資訊
+     * 
+     * @param Request $request
+     * @return Response
+     */
     public function login_info(Request $request)
     {
         try {

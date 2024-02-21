@@ -17,6 +17,9 @@ class AuthServiceProvider extends ServiceProvider
         $configPath = __DIR__ . '/../../config/js_auth.php';
         $this->mergeConfigFrom($configPath, 'js_auth');
 
+        $configPath = __DIR__ . '/../../config/forestage.php';
+        $this->mergeConfigFrom($configPath, 'js_auth');
+
         $this->app->bind(AuthContract::class, AuthService::class);
     }
 
@@ -29,6 +32,12 @@ class AuthServiceProvider extends ServiceProvider
         $this->publishes([
             $source => config_path('js_auth.php'),
         ]);
+
+        $source = realpath($raw = __DIR__.'/../../config/forestage.php') ?: $raw;
+        $this->publishes([
+            $source => config_path('forestage.php'),
+        ]);
+
         $this->loadRoutesFrom(__DIR__.'/../../routes/api.php');
         $this->app->make('router')->aliasMiddleware('js-authenticate-middleware-alias', JsAuthenticate::class);
     }
