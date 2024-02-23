@@ -14,9 +14,10 @@ composer require jsadways/JsAuthenticate
 ```
 php artisan vendor:publish --provider="Js\Authenticator\Providers\AuthServiceProvider"
 ```
-3. 在專案 .env 添加帳號驗證網址
+3. 在專案 .env 添加帳號驗證網址與前端網址
 ```
 JS_AUTH_HOST='http://authenticate.tw'
+FORESTAGE_URL='http://172.16.1.156:3100/struct'
 ```
 
 ## 使用
