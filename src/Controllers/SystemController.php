@@ -3,34 +3,31 @@
 namespace Js\Authenticator\Controllers;
 
 use Illuminate\Http\Request;
-use Js\Authenticator\Services\AuthService;
+use Js\Authenticator\Services\PermissionService;
 use Exception;
 use Log;
-class AuthController
+
+class SystemController
 {
     public function __construct(
-        private AuthService $AuthService
+        private PermissionService $PermissionService
     ){}
 
     /**
-     * 登入驗證
+     * 取得系統需控管權限
      * 
      * @param Request $request
      * @return Response
      */
-    public function login(Request $request)
+    public function get_permission(Request $request)
     {
         try {
-            ['account' => $account, 'password' => $password] = $request->validate([
-                'account' => 'required|string',
-                'password' => 'required|string',
-            ]);
-            $login_data = $this->AuthService->login($account, $password);
+            $permission = $this->PermissionService->get();
 
             return response()->json(
                 [
                     'status_code' => 200,
-                    'data' => $login_data,
+                    'data' => $permission,
                 ],
                 200
             );
@@ -47,25 +44,26 @@ class AuthController
     }
 
     /**
-     * 取得登入資訊
+     * 儲存前端路由
      * 
      * @param Request $request
      * @return Response
      */
-    public function login_info(Request $request)
+    public function set_data(Request $request)
     {
         try {
-            ['token' => $token, 'system_id' => $system_id] = $request->validate([
-                'token' => 'required|string',
-                'system_id' => 'required|int',
+            $data = $request->validate([
+                'data' => 'required|string'
             ]);
 
-            $login_data = $this->AuthService->get_permission($token, $system_id);
+            if (!$this->PermissionService->set_data($data['data'])) {
+                throw new Exception('save forestage to cache is fail.');
+            }
 
             return response()->json(
                 [
                     'status_code' => 200,
-                    'data' => $login_data,
+                    'message' => 'ok',
                 ],
                 200
             );
