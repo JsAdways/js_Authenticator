@@ -1,5 +1,6 @@
 {
-    "name": "js/authenticator",
+    "name": "jsadways/authenticator",
+    "type": "library",
     "autoload": {
         "psr-4": {
             "Js\\Authenticator\\": "src/"
@@ -17,7 +18,8 @@
     },
     "authors": [
         {
-            "name": "otto"
+            "name": "Js-Adways",
+            "email": "it@js-adways.com.tw"
         }
     ],
     "minimum-stability": "dev",
