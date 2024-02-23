@@ -6,7 +6,9 @@ use Cache;
 use Exception;
 use File;
 use Log;
+use Http;
 use Js\Authenticator\Contracts\PermissionContract;
+use Js\Authenticator\Foundations\TreemapFoundation;
 
 class PermissionService implements PermissionContract
 {
@@ -20,83 +22,85 @@ class PermissionService implements PermissionContract
         'parent' => 'data-parent',
     ];
 
-    const CACHE_NAME = 'permission_structure';
+    // 取得前端路由 cache 名稱
+    const SYSTEM_STRUCT_CACHE_NAME = 'system_struct';
 
-    protected $path;
+    // 權限 cache 名稱
+    const PERMISSION_CACHE_NAME = 'permission_structure';
 
-    public function __construct()
+    public function __construct(
+        private TreemapFoundation $TreemapFoundation
+    )
+    {}
+
+    /**
+     * 醬前端路由儲存到 cache
+     */
+    public function set_data(string $data): bool
     {
-        $folder = config('forestage.forestage_path');
-        $this->path = base_path($folder);
+        return Cache::put(self::SYSTEM_STRUCT_CACHE_NAME, $data, now()->addSecond(15));
     }
 
     /**
      * 取得路由權限資料
      *
      * @return array[
-     *     'status' => bool 狀態
-     *     'data' => array 權限資訊
+     *     'head'
+     *     'struct'
      * ]
+     * @throws Exception
      */
     protected function get_route_structure(): array
     {
-        //前端主路由檔案
-        $main_route_path = "{$this->path}/router.js";
-        if (! File::exists($main_route_path)) {
-            throw new Exception("{$main_route_path} is not exists.");
-        }
-        $route_paths[] = $main_route_path;
+        $get_forestage_route = Http::asForm()->get(config('forestage.forestage_url'));
 
-        //取得主路由內容
-        $main_route_content = File::get($main_route_path);
-        //去除換行與空白
-        $main_route_content = preg_replace('/\s(?=)/', '', $main_route_content);
-        preg_match_all('/from\'\~\/(routerComponent.*?)\'/', $main_route_content, $sub_routes);
-        $sub_routes = $sub_routes[1];
-        if (! empty($sub_routes)) {
-            foreach ($sub_routes as $v) {
-                $route_paths[] = "{$this->path}/{$v}.js";
-            }
+        if ($get_forestage_route->failed()) {
+            throw new Exception('get forestage route is fail.');
         }
 
-        //取得所有路徑權限
-        $permission_structures = [];
-        foreach ($route_paths as $route_path) {
-            $path_content = File::get($route_path);
-            $path_content = preg_replace('/\s(?=)/', '', $path_content);
-            preg_match('/\[.*?\]/', $path_content, $route_block);
-            if (empty($route_block)) {
-                Log::debug("{$route_path} is empty.");
-                continue;
-            }
-            //取得路由區塊
-            preg_match_all('/\{(.*?)\}\}/', $route_block[0], $routes);
-            if (empty($routes[1])) {
-                Log::debug("{$route_path} info is empty.");
-                continue;
-            }
+        if(!Cache::has(self::SYSTEM_STRUCT_CACHE_NAME)){
+            throw new Exception('get system_struct cache is fail.');
+        }
 
-            foreach ($routes[1] as $route) {
-                $funtion_info = [
-                    'type' => 'page',
-                ];
-                $data_is_integrity = true;
-                foreach (self::ROUTE_DATA_KEYS as $key) {
-                    $rule = "/{$key}:'(.*?)',/";
-                    preg_match($rule, $route, $data);
-                    if (empty($data)) {
-                        $data_is_integrity = false;
-                        break;
-                    }
-                    $funtion_info[$key] = $data[1];
+        $system_routers = collect(json_decode(Cache::get(self::SYSTEM_STRUCT_CACHE_NAME)));
+        $system_routers = $system_routers->values();
+        data_forget($system_routers, '*.component');
+
+        //找出上方headMenu
+        $menu_head = $system_routers->filter(function ($item) {
+            return collect($item->meta)->has('inMenu') && $item->meta->inMenu === 'head';
+        })->values();
+        $menu_head = collect(json_decode($menu_head->toJson()));
+
+        //找出左側leftMenu結構
+        $menu_head = $this->TreemapFoundation->get_child($system_routers, $menu_head);
+        $menu_head = $menu_head->reduce(function ($result, $item) {
+            $result[$item->name] = $item;
+
+            return $result;
+        });
+
+        //以router name為key，整理結構資料
+        $default_system = '';
+        $system_routers = $system_routers->sortBy('name');
+        $struct = $system_routers->reduce(function ($result, $item) use ($default_system, $system_routers) {
+            if ($item->meta->title !== '登入') {
+                if (isset($item->meta->system)) {
+                    $default_system = $item->meta->system;
                 }
-                if ($data_is_integrity) {
-                    $permission_structures[] = $funtion_info;
-                }
+                $result[$item->name] = [];
+                $result[$item->name]['crumb'] = $this->TreemapFoundation->get_struct($system_routers, $item)->reverse();
+                $result[$item->name]['system'] = $default_system;
+                $result[$item->name]['in_menu'] = $this->TreemapFoundation->get_parent_menu($system_routers, $item->meta->parent);
             }
-        }
 
-        return $permission_structures;
+            return $result;
+        });
+
+        return [
+            'head' => $menu_head,
+            'struct' => $struct
+        ];
     }
 
     /**
@@ -109,11 +113,11 @@ class PermissionService implements PermissionContract
      */
     protected function set_cache(array $permission_structure): void
     {
-        if (Cache::has(self::CACHE_NAME)) {
-            Cache::forget(self::CACHE_NAME);
+        if (Cache::has(self::PERMISSION_CACHE_NAME)) {
+            Cache::forget(self::PERMISSION_CACHE_NAME);
         }
 
-        if (! Cache::put(self::CACHE_NAME, $permission_structure, $seconds = 1440)) {
+        if (! Cache::put(self::PERMISSION_CACHE_NAME, $permission_structure, $seconds = 1440)) {
             throw new Exception('cache had error.');
         }
     }
@@ -128,7 +132,7 @@ class PermissionService implements PermissionContract
      */
     public function get(): array
     {
-        $permission_structure = Cache::get(self::CACHE_NAME);
+        $permission_structure = Cache::get(self::PERMISSION_CACHE_NAME);
         if (is_null($permission_structure)) {    
             if (config('forestage.custom_page_permission')) {
                 $route_structure = config('forestage.page_permission');

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'forestage_path' => env('FORESTAGE_PATH', 'resources/forestage'),
+    'forestage_url' => env('FORESTAGE_URL'),
     'function_permission' => [
         [
             'name' => 'delete',
