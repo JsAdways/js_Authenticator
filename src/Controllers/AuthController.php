@@ -80,4 +80,35 @@ class AuthController
             );
         }
     }
+
+    /**
+     * 登出
+     * 
+     * @param Request $request
+     * @return Response
+     */
+    public function logout(Request $request)
+    {
+        try {
+            $token = $request->bearerToken();
+            $logout = $this->AuthService->logout($token);
+
+            return response()->json(
+                [
+                    'status_code' => 200,
+                    'message' => 'ok'
+                ],
+                200
+            );
+        } catch (Exception $e) {
+            Log::notice('js-auth: '.$e->getMessage());
+            return response()->json(
+                [
+                    'status_code' => 400,
+                    'message' => $e->getMessage()
+                ],
+                400
+            );
+        }
+    }
 }

@@ -12,6 +12,8 @@ use Js\Authenticator\Contracts\AuthContract;
 
 class AuthService implements AuthContract
 {
+    const TOKEN_CACHE = 'LOGIN_';
+
     /**
      * 登入
      *
@@ -34,6 +36,11 @@ class AuthService implements AuthContract
         }
 
         ['data' => $user_data] = $response->json();
+
+        $expiration_time = now()->addMinutes(config('js_auth.expiration_time'));
+        $user_info['expiration_time'] = $expiration_time->toDateTimeString();
+ 
+        Cache::put(self::TOKEN_CACHE.$user_data['token'], $user_data['user'], $expiration_time);
 
         return $user_data;
     }
@@ -84,14 +91,26 @@ class AuthService implements AuthContract
     public function verify_token(string $token): int
     {
         try {
-            if (!Cache::has($token)) {
+            if (!Cache::has(self::TOKEN_CACHE.$token)) {
                 throw new Exception('驗證失效');
             }
-
-            $user = Cache::get($token);
-            return $user['user']['id'];
+            $user = Cache::get(self::TOKEN_CACHE.$token);
+            return $user['id'];
         } catch(Exception $e) {
             throw new Exception($e->getMessage());
         }
+    }
+
+    /**
+     * 取得使用者系統權限
+     *
+     * @param string $token
+     * @param int $system_id
+     * @return array
+     * @throws Exception
+     */
+    public function logout(string $token): bool
+    {
+        return Cache::forget(self::TOKEN_CACHE.$token);
     }
 }

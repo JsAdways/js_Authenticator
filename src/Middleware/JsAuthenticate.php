@@ -16,6 +16,9 @@ class JsAuthenticate
         try {
             $AuthService = new AuthService();
             $token = $request->bearerToken();
+            if (is_null($token)) {
+                throw new Exception('token is null');
+            }
             $id = $AuthService->verify_token($token);
             $request->merge(['user_id' => $id]);
             return $next($request);
