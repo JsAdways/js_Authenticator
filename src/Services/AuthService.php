@@ -48,24 +48,28 @@ class AuthService implements AuthContract
      */
     public function get_permission(string $token, int $system_id): array
     {
-        $host = config('js_auth.host');
-        $url = "${host}/service/api/permission";
+        if (Cache::has($token)) {
+            $user_info = Cache::get($token);
+        } else {
+            $host = config('js_auth.host');
+            $url = "${host}/service/api/permission";
 
-        $response = Http::withToken($token)->accept('application/json')->post($url, [
-            'id' => $system_id
-        ]);
+            $response = Http::withToken($token)->accept('application/json')->post($url, [
+                'id' => $system_id
+            ]);
 
-        if ($response->failed()) {
-            ['status_code' => $status_code, 'message' => $message] = $response->json();
-            throw new Exception("登入失敗 - 帳號：${account} 原因：${message}");
-        }
-        $json = $response->json();
-        $user_info = $json['data'];
-        $user_info['token'] = $token;
-        $expiration_time = now()->addMinutes(config('js_auth.expiration_time'));
-        $user_info['expiration_time'] = $expiration_time->toDateTimeString();
+            if ($response->failed()) {
+                ['status_code' => $status_code, 'message' => $message] = $response->json();
+                throw new Exception("登入失敗 - 帳號：${account} 原因：${message}");
+            }
+            $json = $response->json();
+            $user_info = $json['data'];
+            $user_info['token'] = $token;
+            $expiration_time = now()->addMinutes(config('js_auth.expiration_time'));
+            $user_info['expiration_time'] = $expiration_time->toDateTimeString();
        
-        Cache::put($token, $user_info, $expiration_time);
+            Cache::put($token, $user_info, $expiration_time);
+        }
 
         return $user_info;
     }
