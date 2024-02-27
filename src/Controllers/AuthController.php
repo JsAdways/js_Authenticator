@@ -52,9 +52,17 @@ class AuthController
      * @param Request $request
      * @return Response
      */
-    public function login_info(Request $request)
+    public function login_info(int $id,Request $request)
     {
         try {
+            $token = $request->header('Authorization');
+            $system_id = $id;
+            $request = new Request();
+            $request->replace([
+                'token' => $token,
+                'system_id' => $system_id
+            ]);
+
             ['token' => $token, 'system_id' => $system_id] = $request->validate([
                 'token' => 'required|string',
                 'system_id' => 'required|int',
