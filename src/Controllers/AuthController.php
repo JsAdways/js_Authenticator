@@ -31,6 +31,7 @@ class AuthController
                 [
                     'status_code' => 200,
                     'data' => $login_data,
+                    'token' => $login_data['token'],
                 ],
                 200
             );
@@ -55,7 +56,7 @@ class AuthController
     public function login_info(int $id,Request $request)
     {
         try {
-            $token = $request->header('Authorization');
+            $token = $request->bearerToken();
             $system_id = $id;
             $request = new Request();
             $request->replace([
