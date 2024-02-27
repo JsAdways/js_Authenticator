@@ -64,7 +64,7 @@ class PermissionService implements PermissionContract
 
         $system_routers = collect(json_decode(Cache::get(self::SYSTEM_STRUCT_CACHE_NAME)));
         $system_routers = $system_routers->values();
-        data_forget($system_routers, '*.component');
+        //data_forget($system_routers, '*.component');
 
         //找出上方headMenu
         $menu_head = $system_routers->filter(function ($item) {
