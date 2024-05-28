@@ -120,4 +120,35 @@ class AuthController
             );
         }
     }
+
+    /**
+     * 清除權限快取
+     * 
+     * @param Request $request
+     * @return Response
+     */
+    public function clear_permission_cache(Request $request)
+    {
+        try {
+            $token = $request->bearerToken();
+            $logout = $this->AuthService->clear_permission_cache($token);
+
+            return response()->json(
+                [
+                    'status_code' => 200,
+                    'message' => 'ok'
+                ],
+                200
+            );
+        } catch (Exception $e) {
+            Log::notice('js-auth: '.$e->getMessage());
+            return response()->json(
+                [
+                    'status_code' => 400,
+                    'message' => $e->getMessage()
+                ],
+                400
+            );
+        }
+    }
 }

@@ -9,6 +9,7 @@ Route::group(['prefix' => 'js/api', 'middleware' => 'api'], function() {
     Route::post('/login', [AuthController::class, 'login']);
     Route::middleware(['js-authenticate-middleware-alias'])->group(function () {
         Route::post('/permission/{id}', [AuthController::class, 'login_info']);
+        Route::delete('/permission', [AuthController::class, 'clear_permission_cache']);
         Route::post('/logout', [AuthController::class, 'logout']);
     });
     Route::post('/system/permission', [SystemController::class, 'get_permission']);

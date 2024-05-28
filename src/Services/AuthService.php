@@ -88,6 +88,24 @@ class AuthService implements AuthContract
     }
 
     /**
+     * 清除使用者權限快取
+     *
+     * @param string $token
+     * @return bool
+     * @throws Exception
+     */
+    public function clear_permission_cache(string $token): bool
+    {
+        $result = true;
+
+        if (Cache::has($token)) {
+            $result = Cache::forget($token);
+        } 
+
+        return $result;
+    }
+
+    /**
      * 使用者權限驗證
      *
      * @param string $token
