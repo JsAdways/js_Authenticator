@@ -73,7 +73,7 @@ class AuthService implements AuthContract
 
             if ($response->failed()) {
                 ['status_code' => $status_code, 'message' => $message] = $response->json();
-                throw new Exception("登入失敗 - 帳號：${account} 原因：${message}");
+                throw new Exception("取得權限失敗失敗 - 原因：${message}");
             }
             $json = $response->json();
             $user_info = $json['data'];
