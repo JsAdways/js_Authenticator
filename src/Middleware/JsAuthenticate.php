@@ -19,7 +19,8 @@ class JsAuthenticate
             if (is_null($token)) {
                 throw new Exception('token is null');
             }
-            $AuthService->verify_token($token);
+            $user_id = $AuthService->verify_token($token);
+            $request->merge(['user_id' => $user_id]);
             return $next($request);
         } catch(Exception $e) {
             Log::notice('js-auth: '.$e->getMessage());

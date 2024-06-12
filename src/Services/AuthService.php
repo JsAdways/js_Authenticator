@@ -112,7 +112,7 @@ class AuthService implements AuthContract
      * @return int 使用者 id
      * @throws Exception
      */
-    public function verify_token(string $token): bool
+    public function verify_token(string $token): int
     {
         try {
             if (!Cache::has(self::TOKEN_CACHE.$token)) {
@@ -123,7 +123,8 @@ class AuthService implements AuthContract
             if ($token_is_valid) {
                 throw new Exception('token 已逾期');
             }
-            return true;
+            $user_info = Cache::get($token);
+            return $user_info['user']['id'];
         } catch(Exception $e) {
             throw new Exception($e->getMessage());
         }
