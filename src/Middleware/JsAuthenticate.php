@@ -21,9 +21,8 @@ class JsAuthenticate
             }
             $user_id = $AuthService->verify_token($token);
             $request->merge(['user_id' => $user_id]);
-            return $next($request);
-        } catch(Exception $e) {
-            Log::notice('js-auth: '.$e->getMessage());
+        } catch (Exception $e) {
+            Log::notice('js-auth: ' . $e->getMessage());
             return response()->json(
                 [
                     'status_code' => 401,
@@ -32,5 +31,6 @@ class JsAuthenticate
                 401
             );
         }
+        return $next($request);
     }
 }
