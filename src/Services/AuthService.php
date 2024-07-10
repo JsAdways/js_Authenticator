@@ -123,8 +123,13 @@ class AuthService implements AuthContract
             if ($token_is_valid) {
                 throw new Exception('token 已逾期');
             }
+
             $user_info = Cache::get($token);
-            return $user_info['user']['id'];
+            $user_id = $user_info['user']['id'];
+
+            Cache::put("user-${user_id}", $token, 600);
+    
+            return $user_id;
         } catch(Exception $e) {
             throw new Exception($e->getMessage());
         }
@@ -141,5 +146,37 @@ class AuthService implements AuthContract
     public function logout(string $token): bool
     {
         return Cache::forget(self::TOKEN_CACHE.$token);
+    }
+
+    /**
+     * 使用取得部門ID
+     *
+     * @param int $user_id
+     * @return array
+     * @throws Exception
+     */
+    public function get_department_member_with_id(int $user_id): array
+    {
+        try {
+            $token = Cache::get("user-${user_id}");
+            $token_info = Cache::get($token);
+            $employee_list = collect($token_info['employee']);
+
+            $employee = $employee_list->first(function (array $employee, int $key) use ($user_id) {
+                return $employee['department_member'][0]['employee_id'] == $user_id;
+            });
+
+            $department_id = $employee['department_member'][0]['department_id'];
+            $department_member_list = $employee_list->filter(function (array $employee, int $key) use ($department_id) {
+                return $employee['department_member'][0]['department_id'] == $department_id;
+            });
+
+            $department_employee_id_list = $department_member_list->pluck('id')->toArray();
+
+            return $department_employee_id_list;
+        } catch(Exception $e) {
+            Log::notice('js-auth: '.$e->getMessage());
+            throw new Exception($e->getMessage());
+        }
     }
 }
