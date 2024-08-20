@@ -25,9 +25,6 @@ class PermissionService implements PermissionContract
     // 取得前端路由 cache 名稱
     const SYSTEM_STRUCT_CACHE_NAME = 'system_struct';
 
-    // 權限 cache 名稱
-    const PERMISSION_CACHE_NAME = 'permission_structure';
-
     public function __construct(
         private TreemapFoundation $TreemapFoundation
     )
@@ -111,42 +108,18 @@ class PermissionService implements PermissionContract
      *     'message' => string 權限資訊
      * ]
      */
-    protected function set_cache(array $permission_structure): void
-    {
-        if (Cache::has(self::PERMISSION_CACHE_NAME)) {
-            Cache::forget(self::PERMISSION_CACHE_NAME);
-        }
-
-        if (! Cache::put(self::PERMISSION_CACHE_NAME, $permission_structure, $seconds = 1440)) {
-            throw new Exception('cache had error.');
-        }
-    }
-
-    /**
-     * 取得路由權限資料
-     *
-     * @return array[
-     *     'status' => bool 狀態
-     *     'message' => string 權限資訊
-     * ]
-     */
     public function get(): array
     {
-        $permission_structure = Cache::get(self::PERMISSION_CACHE_NAME);
-        if (is_null($permission_structure)) {    
-            if (config('forestage.custom_page_permission')) {
-                $route_structure = config('forestage.page_permission');
-            } else {
-                $route_structure = $this->get_route_structure();
-            }
-
-            $permission_structure = [
-                'page' => $route_structure,
-                'function' => config('forestage.function_permission'),
-            ];
-
-            $this->set_cache($permission_structure);
+        if (config('forestage.custom_page_permission')) {
+            $route_structure = config('forestage.page_permission');
+        } else {
+            $route_structure = $this->get_route_structure();
         }
+
+        $permission_structure = [
+            'page' => $route_structure,
+            'function' => config('forestage.function_permission'),
+        ];
 
         return $permission_structure;
     }
