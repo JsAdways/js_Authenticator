@@ -27,13 +27,13 @@ class AuthService implements AuthContract
     {
         $key = Crypt::encryptString(json_encode(['account' => $account, 'password' => $password]));
         $host = config('js_auth.host');
-        $url = "${host}/service/api/login";
+        $url = "{$host}/service/api/login";
 
         $response = Http::accept('application/json')->post($url, ['key' => $key]);
 
         if ($response->failed()) {
-            ['status_code' => $status_code, 'message' => $message] = $response->json();
-            throw new Exception("登入失敗 - 帳號：${account} 原因：${message}");
+            $response_json = json_encode($response->json(), JSON_UNESCAPED_UNICODE);
+            throw new Exception("登入失敗 - 帳號：{$account} 原因：{$response_json}");
         }
 
         ['data' => $user_data] = $response->json();
@@ -65,16 +65,17 @@ class AuthService implements AuthContract
             $user_info = Cache::get($token);
         } else {
             $host = config('js_auth.host');
-            $url = "${host}/service/api/permission";
+            $url = "{$host}/service/api/permission";
 
             $response = Http::withToken($token)->accept('application/json')->post($url, [
                 'id' => $system_id
             ]);
 
             if ($response->failed()) {
-                ['status_code' => $status_code, 'message' => $message] = $response->json();
-                throw new Exception("取得權限失敗失敗 - 原因：${message}");
+                $response_json = json_encode($response->json(),  JSON_UNESCAPED_UNICODE);
+                throw new Exception("登入失敗 - 取得權限失敗失敗, 原因：{$response_json}");
             }
+
             $json = $response->json();
             $user_info = $json['data'];
             $user_info['token'] = $token;
@@ -83,7 +84,7 @@ class AuthService implements AuthContract
        
             Cache::put($token, $user_info, $expiration_time);
             $user_id = $user_info['user']['id'];
-            Cache::put("user-${user_id}", $token, $expiration_time);
+            Cache::put("user-{$user_id}", $token, $expiration_time);
         }
 
         return $user_info;
