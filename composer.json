@@ -9,10 +9,12 @@
     "extra": {
         "laravel": {
           "providers": [
-            "Js\\Authenticator\\Providers\\AuthServiceProvider"
+                "Js\\Authenticator\\Providers\\AuthServiceProvider",
+                "Js\\Authenticator\\Providers\\UserServiceProvider"
           ],
           "aliases": {
-            "JsAuth":  "Js\\Authenticator\\Facades\\AuthFacade"
+                "JsAuth":  "Js\\Authenticator\\Facades\\AuthFacade",
+                "JsUser":  "Js\\Authenticator\\Facades\\UserFacade"
           }
         }
     },

@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Js\Authenticator\Services\AuthService;
 use Exception;
 use Log;
+use Js\Authenticator\Facades\UserFacade;
 
 class JsAuthenticate
 {
@@ -20,6 +21,7 @@ class JsAuthenticate
                 throw new Exception('token is null');
             }
             $user_id = $AuthService->verify_token($token);
+            UserFacade::init($token);
             $request->merge(['user_id' => $user_id]);
         } catch (Exception $e) {
             Log::notice('js-auth: ' . $e->getMessage());

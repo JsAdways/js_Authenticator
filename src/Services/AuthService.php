@@ -4,10 +4,8 @@ namespace Js\Authenticator\Services;
 
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Http;
-use Hash;
 use Cache;
 use Exception;
-use Log;
 use Carbon\Carbon;
 use Js\Authenticator\Contracts\AuthContract;
 
@@ -147,28 +145,5 @@ class AuthService implements AuthContract
     public function logout(string $token): bool
     {
         return Cache::forget(self::TOKEN_CACHE.$token);
-    }
-
-    /**
-     * 使用取得搖滾與部門資料
-     *
-     * @param int $user_id
-     * @return array
-     * @throws Exception
-     */
-    public function get_data_with_id(int $user_id): array
-    {
-        try {
-            $token = Cache::get("user-${user_id}");
-            $token_info = Cache::get($token);
-
-            return [
-                'employee_list' => $token_info['employee'],
-                'department_list' => $token_info['department'],
-            ];
-        } catch(Exception $e) {
-            Log::notice('js-auth: '.$e->getMessage());
-            throw new Exception($e->getMessage());
-        }
     }
 }
