@@ -5,6 +5,7 @@ namespace Js\Authenticator\Contracts;
 interface UserContract
 {
     public function init(string $token): bool;
+    public function get_token(): string|null;
     public function get_user(): array;
     public function get_employee(): array;
     public function get_department(): array;

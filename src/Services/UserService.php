@@ -39,6 +39,17 @@ final class UserService
     }
 
     /**
+     * 設定 token
+     *
+     * @param string $token
+     * @return static
+     */
+    public function get_token(): string|null
+    {
+        return $this->token;
+    }
+
+    /**
      * 取得資料
      *
      * @return static
