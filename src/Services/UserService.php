@@ -2,8 +2,8 @@
 
 namespace Js\Authenticator\Services;
 
-use Cache;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 
 final class UserService
 {
@@ -16,8 +16,9 @@ final class UserService
      *
      * @param string $token
      * @return static
+     * @throws Exception
      */
-    public function init(string $token): static
+    public function init(string $token): UserService
     {
         $this->set_token(token: $token)
             ->set_data();
@@ -31,7 +32,7 @@ final class UserService
      * @param string $token
      * @return static
      */
-    private function set_token(string $token): static
+    private function set_token(string $token): UserService
     {
         $this->token = $token;
 
@@ -41,8 +42,7 @@ final class UserService
     /**
      * 設定 token
      *
-     * @param string $token
-     * @return static
+     * @return string|null
      */
     public function get_token(): string|null
     {
@@ -53,8 +53,9 @@ final class UserService
      * 取得資料
      *
      * @return static
+     * @throws Exception
      */
-    private function set_data(): static
+    private function set_data(): UserService
     {
         if (!Cache::has($this->token)) {
             throw new Exception('無 token 相關資料。');

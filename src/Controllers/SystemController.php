@@ -2,24 +2,25 @@
 
 namespace Js\Authenticator\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Js\Authenticator\Services\PermissionService;
 use Exception;
-use Log;
 
 class SystemController
 {
     public function __construct(
-        private PermissionService $PermissionService
+        private readonly PermissionService $PermissionService
     ){}
 
     /**
      * 取得系統需控管權限
-     * 
+     *
      * @param Request $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function get_permission(Request $request)
+    public function get_permission(Request $request): JsonResponse
     {
         try {
             $permission = $this->PermissionService->get();
@@ -45,11 +46,11 @@ class SystemController
 
     /**
      * 儲存前端路由
-     * 
+     *
      * @param Request $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function set_data(Request $request)
+    public function set_data(Request $request): JsonResponse
     {
         try {
             $data = $request->validate([

@@ -2,11 +2,9 @@
 
 namespace Js\Authenticator\Services;
 
-use Cache;
 use Exception;
-use File;
-use Log;
-use Http;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Js\Authenticator\Contracts\PermissionContract;
 use Js\Authenticator\Foundations\TreemapFoundation;
 
@@ -26,7 +24,7 @@ class PermissionService implements PermissionContract
     const SYSTEM_STRUCT_CACHE_NAME = 'system_struct';
 
     public function __construct(
-        private TreemapFoundation $TreemapFoundation
+        private readonly TreemapFoundation $TreemapFoundation
     )
     {}
 
@@ -107,6 +105,7 @@ class PermissionService implements PermissionContract
      *     'status' => bool 狀態
      *     'message' => string 權限資訊
      * ]
+     * @throws Exception
      */
     public function get(): array
     {
