@@ -14,7 +14,7 @@ class AuthController
 
     /**
      * 登入驗證
-     * 
+     *
      * @param Request $request
      * @return Response
      */
@@ -49,7 +49,7 @@ class AuthController
 
     /**
      * 取得登入資訊
-     * 
+     *
      * @param Request $request
      * @return Response
      */
@@ -90,9 +90,14 @@ class AuthController
         }
     }
 
+    public function set_permission(Request $request): void
+    {
+        $this->AuthService->set_permission(token: $request->bearerToken(),user_info: $request->get('user_info'));
+    }
+
     /**
      * 登出
-     * 
+     *
      * @param Request $request
      * @return Response
      */
@@ -123,7 +128,7 @@ class AuthController
 
     /**
      * 清除權限快取
-     * 
+     *
      * @param Request $request
      * @return Response
      */
