@@ -67,7 +67,6 @@ class AuthService implements AuthContract
     {
         $expiration_time = $this->_gen_expiration_time();
         $this->_set_login_cache(token:$token,expiration_time: $expiration_time);
-        $this->_set_permission_cache(token:$token,user_info: $user_info,expiration_time: $expiration_time);
     }
 
     /**
