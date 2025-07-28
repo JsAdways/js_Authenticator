@@ -57,8 +57,19 @@ class PermissionService implements PermissionContract
             throw new Exception('get system_struct cache is fail.');
         }
 
-        $system_routers = collect(json_decode(Cache::get(self::SYSTEM_STRUCT_CACHE_NAME)));
-        $system_routers = $system_routers->values();
+        if($get_forestage_route->json() === null){
+            //nuxt版本
+            if(!Cache::has(self::SYSTEM_STRUCT_CACHE_NAME)){
+                throw new Exception('get system_struct cache is fail.');
+            }
+            $system_routers = collect(json_decode(Cache::get(self::SYSTEM_STRUCT_CACHE_NAME)));
+            $system_routers = $system_routers->values();
+        }else{
+            //next版本
+            $system_routers = json_decode(json_encode($get_forestage_route->json()));
+            $system_routers = collect($system_routers);
+        }
+
         //data_forget($system_routers, '*.component');
 
         //找出上方headMenu
