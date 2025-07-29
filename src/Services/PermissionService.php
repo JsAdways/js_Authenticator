@@ -53,10 +53,6 @@ class PermissionService implements PermissionContract
             throw new Exception('get forestage route is fail.');
         }
 
-        if(!Cache::has(self::SYSTEM_STRUCT_CACHE_NAME)){
-            throw new Exception('get system_struct cache is fail.');
-        }
-
         if($get_forestage_route->json() === null){
             //nuxt版本
             if(!Cache::has(self::SYSTEM_STRUCT_CACHE_NAME)){
