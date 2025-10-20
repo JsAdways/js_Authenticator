@@ -2,23 +2,25 @@
 
 namespace Js\Authenticator\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Response;
 use Js\Authenticator\Services\AuthService;
 use Exception;
-use Log;
 class AuthController
 {
     public function __construct(
-        private AuthService $AuthService
+        private readonly AuthService $AuthService
     ){}
 
     /**
      * 登入驗證
-     * 
+     *
      * @param Request $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         try {
             ['account' => $account, 'password' => $password] = $request->validate([
@@ -49,11 +51,12 @@ class AuthController
 
     /**
      * 取得登入資訊
-     * 
+     *
+     * @param int $id
      * @param Request $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function login_info(int $id,Request $request)
+    public function login_info(int $id,Request $request): JsonResponse
     {
         try {
             $token = $request->bearerToken();
@@ -90,13 +93,18 @@ class AuthController
         }
     }
 
+    public function set_permission(Request $request): void
+    {
+        $this->AuthService->set_permission(token: $request->bearerToken(),user_info: $request->get('user_info'));
+    }
+
     /**
      * 登出
-     * 
+     *
      * @param Request $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         try {
             $token = $request->bearerToken();
@@ -123,11 +131,11 @@ class AuthController
 
     /**
      * 清除權限快取
-     * 
+     *
      * @param Request $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function clear_permission_cache(Request $request)
+    public function clear_permission_cache(Request $request): JsonResponse
     {
         try {
             $token = $request->bearerToken();
