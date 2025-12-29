@@ -73,7 +73,7 @@ final class UserService
      */
     public function get_user(): array
     {
-        return array_key_exists('user', $this->data) ? $this->data['user']->toArray() : [];
+        return array_key_exists('user', $this->data) ? $this->data['user'] : [];
     }
 
     /**
