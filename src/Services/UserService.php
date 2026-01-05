@@ -105,4 +105,14 @@ final class UserService
     {
         return array_key_exists('system', $this->data) ? $this->data['system'] : [];
     }
+
+    /**
+     * 取得可查閱權限成員 Id
+     *
+     * @return array
+     */
+    public function get_accessible_member_ids(): array
+    {
+        return array_key_exists('data_permission', $this->data) ? $this->data['data_permission'] : [];
+    }
 }
